@@ -1,9 +1,15 @@
 <template>
-    <my-page title="MIT 协议">
+    <my-page title="MIT 协议" :page="page">
         <ui-article class="article">
             <h1>MIT License</h1>
             <p></p>
-            <p>Copyright (c) {{ time }} {{ owner }}</p>
+            <p>Copyright (c)
+                <ui-text-field v-model="time" v-if="isConfig" />
+                <span v-else>{{ time }}</span>
+
+                <ui-text-field v-model="owner" v-if="isConfig" />
+                <span v-else>{{ owner }}</span>
+            </p>
             <p>Permission is hereby granted, free of charge, to any person obtaining a copy
                 of this software and associated documentation files (the "Software"), to deal
                 in the Software without restriction, including without limitation the rights
@@ -26,7 +32,8 @@
             <li></li>
         </ul>
         <div class="btns">
-            <ui-raised-button label="下载" ref="button" @click="toggle"/>
+            <ui-raised-button class="btn" label="下载" ref="button" @click="toggle"/>
+            <ui-raised-button class="btn" label="配置" @click="config"/>
             <ui-popover :trigger="trigger" :open="open" @close="handleClose">
                 <ui-menu>
                     <ui-menu-item title="LICENSE.md" @click="download('LICENSE.md')" />
@@ -44,13 +51,27 @@
     export default {
         data () {
             return {
-                time: '2018',
-                owner: 'yunser.com',
+                isConfig: false,
+                time: '',
+                owner: '',
                 open: false,
-                trigger: null
+                trigger: null,
+                page: {
+                    menu: [
+                        {
+                            type: 'icon',
+                            icon: 'check',
+                            click: this.finish,
+                            visible: false
+                        }
+                    ]
+                }
             }
         },
         mounted() {
+            this.owner = this.$route.query.owner || 'yunser.com'
+            this.time = this.$route.query.time || '2016-2018'
+
             this.trigger = this.$refs.button.$el
         },
         methods: {
@@ -59,6 +80,12 @@
             },
             handleClose (e) {
                 this.open = false
+            },
+            config() {
+                this.isConfig = !this.isConfig
+            },
+            finish() {
+                this.isConfig = false
             },
             download(filename) {
                 let content = `MIT License
@@ -89,8 +116,15 @@ SOFTWARE.`
     }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
     .article {
         max-width: 750px;
+    }
+
+    .btns {
+        margin-top: 40px;
+        .btn {
+            margin-right: 8px;
+        }
     }
 </style>
